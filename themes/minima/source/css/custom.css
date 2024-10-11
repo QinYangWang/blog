@@ -14,6 +14,18 @@
   font-display: swap; /* Add font-display */
 }
 
+/* jyunsaikaai-regular - latin */
+@font-face {
+  font-family: 'JyunsaiKaai';
+  font-style: normal;
+  font-weight: 400;
+
+  src: local('JyunsaiKaai Regular'), local('JyunsaiKaai-Regular'),
+       url('../fonts/jyunsaikaai-regular.ttf') format('truetype'); /* Safari, Android, iOS */
+
+  font-display: swap; /* Add font-display */
+}
+
 /* inter-regular - latin */
 @font-face {
   font-family: 'Inter';
@@ -182,7 +194,7 @@ body.darkmode code:not(pre code) {
 
 /* blockquote */
 blockquote {
-  font-family: 'Inter';
+  font-family: 'JyunsaiKaai';
   background-color: rgba(148, 148, 149, 0.08) ;
   margin: 1.5em 0px;
   padding: 1.1em 20px 1px 20px;
@@ -190,7 +202,7 @@ blockquote {
 }
 
 blockquote footer {
-  font-family: 'Inter';
+  font-family: 'JyunsaiKaai';
   font-size: 16px;
   padding-bottom: 10px;
   margin-top: -10px;
