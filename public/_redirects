@@ -1,11 +1,8 @@
 # Old NotionNext paths that novon serves elsewhere.
-/feed            /rss.xml       200
 /page/2          /              301
 /page/*          /              301
 /search          /              301
-/tag/Docker      /tags/docker   301
 # tags on the old sitemap that no longer have posts
 /tag/信用卡       /              301
 /tag/科技         /              301
 /tag/产品体验     /              301
-/tag/:tag        /tags/:tag     301

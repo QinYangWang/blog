@@ -6,6 +6,10 @@ export default defineConfig({
   url: 'https://qinyang.wang',
   lang: 'zh-CN',
   layout: 'blog',
+  trailingSlash: false,
+  rss: { path: '/feed', full: true },
+  tags: { path: '/tag', lowercase: false },
+  og: { enabled: true },
   nav: [
     { label: '博客', href: '/' },
     { label: '关于', href: '/about' },

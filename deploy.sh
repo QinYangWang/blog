@@ -17,5 +17,5 @@ JWT="$JWT" BLAKE3="$TOOLS/blake3-wasm" NO_PROXY='*' no_proxy='*' HTTPS_PROXY= HT
 curl -fsS -X POST "$API/deployments" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
   -F "manifest=<.manifest.json" -F "branch=main" -F "commit_dirty=true" \
   -F "commit_message=novon build $(date -u +%FT%TZ)" \
-  -F "_redirects=@dist/_redirects" \
+  -F "_redirects=@dist/_redirects" -F "_headers=@dist/_headers" \
   | python3 -c 'import json,sys;d=json.load(sys.stdin);r=d["result"];print(d["success"], r["id"], r["url"], r.get("aliases"))'
