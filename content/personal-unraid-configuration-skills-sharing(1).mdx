@@ -1,0 +1,119 @@
+---
+title: "折腾日记 | 个人unraid配置技巧分享"
+description: "折腾家里nas的时候，做过一些步骤，在此整理公布。"
+date: 2024-08-01
+tags: ["折腾日记"]
+author: QinYang Wang
+---
+
+去年手欠买了一个万由HS-201P路由器，由于万由的U-NAS系统实在难用，于是它光荣的吃灰了，这周回家的时候看到它，想着换个系统发挥下余热，本文即是分享下我的折腾过程，对需要的朋友做个参考。
+
+## NAS HS-201P
+
+<strong>先来看看配置部分：</strong>
+
+- CPU：四核J4125
+- 内存：2-32G可选（DDR4笔记本内存）
+- 网口：2X2.5G网口（螃蟹的网卡，型号是：rtl8125b-2）
+- 硬盘位：2个热插拔3.5”/2.5” SATA3
+- HDMI： 1 x HDMI
+- USB： 前置1 x USB 3.0，后置2 x USB 3.0
+- 操作系统：UNAS 6.0 alpha（稍后吐槽）
+- 其它：内置16G emmc安装了系统，同时还支持一个NVME接口（可以安装一个M.2的SSD）
+
+## 为什么选择 UNRAID？
+
+实际对比 群晖DSM/ UNRAID / FreeNAS 等NAS操作系统，最后最中意UNRAID。价格合理，6盘位的59$，12盘位的89$，无限盘位的129$，按实际需求选购系统即可。官方同时也提供了30天免费试用可供体验。
+
+我购买的是最便宜的6盘位的59$。
+
+## 安装APPS应用市场失败
+
+### 配置代理
+
+默认情况下，系统并未预安装app应用市场。因此，在APPS界面点击安装按钮时，由于众所周知的网络问题，操作会出现失败。
+
+在这里，你需要拥有一个可以突破网络限制的魔法工具。你只需要在同一局域网内的任何设备上打开clash的“允许局域网连接”功能，注意clash的默认http\_proxy端口是7890。
+
+接着，打开右上角的命令运行窗口，你需要编辑<strong>/root/.wgetrc</strong>这个文件，并写入以下的代理设置代码：
+
+```text
+use_proxy=yes
+http_proxy=http://[你的clash设备IP地址]:[默认端口号7890]
+https_proxy=http://[你的clash设备IP地址]:[默认端口号7890]
+wait=10
+```
+
+完成以上步骤并保存后，你无需重新启动系统，直接在APPS下点击安装，便可以顺利安装应用市场了。
+
+### 设置开机启动
+
+因为unraid是从U盘启动的，重启后刚刚编辑的root/.wgetrc这个文件就没了，所以要编辑/boot/config/go这个文件，写入以下代码即可
+
+```text
+echo "use_proxy=yes" >> /root/.wgetrc
+echo "http_proxy=http://[你的clash设备IP]:[端口默认7890]" >> /root/.wgetrc
+echo "https_proxy=http://[你的clash设备IP]:[端口默认7890]" >> /root/.wgetrc
+echo "wait=10" >> /root/.wgetrc
+```
+
+这段的含义就是U盘引导开机的时候，在root里面写入一个.wgetrc的文件，就是把上面的代码开机的时候新建写入一遍。
+
+## Docker 网络问题
+
+### WEB-UI 卡死
+
+经过使用发现，市场安装docker的时候，如果拉取镜像网速超慢，<strong>unraid会假死，整个系统卡死。</strong>
+
+如果发生这种情况，请**换个浏览器**或者**新开一个隐私窗口**即可解决。
+
+同时，也更推荐使用 <strong>`docker pull`</strong> **命令行**的形式拉取镜像而不是从应用市场直接安装。
+
+## Docker 镜像代理
+
+由于国内已经无法访问 **Docker Hub**，并且对其他的镜像仓库拉取也非常缓慢，因此建议为 **UNRAID** 设置镜像代理。
+
+编辑/etc/docker/daemon.json文件，写入以下代码：
+
+```json
+{
+  "registry-mirrors": ["https://huecker.io"]
+}
+```
+
+这里要注意，如果是刚安装的系统，要启动一次主序列，不然编辑会提示文件夹不存在
+
+编辑完成之后，重启一下docker服务，到SETTINGS的docker里面关了再开，或者直接命令重启都行
+
+命令docker info查看有没有设置成功，会有个Registry Mirrors：里面显示两个链接
+
+另外开机启用同样修改/root/config/go文件
+
+```text
+mkdir -p /etc/docker
+tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": ["https://hub-mirror.c.163.com","https://你自己的.mirror.aliyuncs.com"]
+}
+EOF
+```
+
+如果不是 docker hub 的镜像，可以参考我的《国内可用镜像仓库代理》的那篇文章。
+
+## 万由NAS风扇降速
+
+切换到 unraid 的命令行页面，执行以下命令：
+
+```text
+# 下载 i2c-tools
+wget -c https://packages.slackonly.com/pub/packages/14.2-x86_64/system/i2c-tools/i2c-tools-4.1-x86_64-1_slonly.txz
+# 安装 i2c-tools
+installpkg i2c-tools-4.1-x86_64-1_slonly.txz
+modprobe i2c-dev
+# 可选步骤
+i2cdetect -l | grep smbus
+# 调整风扇转速，修改最后的50
+i2cset -y 0 0x54 0xf0 50
+```
+
+这个步骤设置完之后即使重启了也不会复原，因此可以不设置到开机启动。

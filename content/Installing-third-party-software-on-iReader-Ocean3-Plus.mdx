@@ -1,0 +1,87 @@
+---
+title: "折腾日记 | iReader Ocean3 Plus安装第三方软件"
+description: "本文描述了我如何通过辅助程序给iReader Ocean3 Plus安装第三方软件。"
+date: 2025-09-07
+tags: ["折腾日记"]
+author: QinYang Wang
+---
+
+## 前言
+
+掌阅给一些版本的阅读器（如**light 3 turbe、ocean3 turbe 、smart air pro、smart X3**等高性能版本）开放了安装权限，但是对于低性能的普通版本，应用商店内依然只有一个**微信阅读墨水屏版**，也无法通过导入apk文件的方式安装第三方app。
+
+但是我又想在我的**iReader Ocean3 Plus**上用“阅读”看网络小说，所以研究了一下怎么安装第三方app，搜到的教程中最靠谱的是通过替换**微信阅读墨水屏版**apk安装第三方软件，但是由于手残党操作了很多遍都失败了，因此一怒之下写了个golang程序来进行替换，最终也是成功在**iReader Ocean3 Plus**上用上了第三方软件。
+
+![](/images/Installing-third-party-software-on-iReader-Ocean3-Plus/267f1b2f-d893-8048-900b-db4468f9bebd.png)
+
+由于涉及到代码变更和命令行操作，此教程只适用有一定编程基础的人群，如果没有编程基础可以参考下面的文章：
+
+[如何给ireader掌阅电子书阅读器安装第三方app - 知乎](https://zhuanlan.zhihu.com/p/700696763)
+
+那么话不多说，下面介绍下我操作的流程。
+
+## 安装第三方软件
+
+在进行替换操作之前我们需要先准备下面的操作：
+
+1. 确定应用商店里的微信阅读墨水屏版的版本
+2. 准备好需要安装的软件安装包和修改辅助程序参数
+3. 运行辅助程序同时从应用商店开始安装微信阅读墨水屏版
+
+### 确定应用商店里的微信阅读墨水屏版的版本
+
+1. 使用USB数据线将设备连接电脑，然后在设备中打开设置**应用**⇒**应用市场**，点击**微信读书墨水屏版**右侧的下载按钮：
+
+![](/images/Installing-third-party-software-on-iReader-Ocean3-Plus/267f1b2f-d893-808d-8c60-c7b2b4e25a41.png)
+
+![](/images/Installing-third-party-software-on-iReader-Ocean3-Plus/267f1b2f-d893-80e5-a8c7-f955d5f17650.png)
+
+![](/images/Installing-third-party-software-on-iReader-Ocean3-Plus/267f1b2f-d893-8071-ad52-eb906590a0b8.png)
+
+2. 等到应用商店中**微信读书墨水屏版**右侧的下载按钮变成安装中时我们可以在电脑的挂载存储中的**iReader\\app\\com.tencent.weread.eink**目录下看到出现了一个apk文件，本文编写时的文件名为<strong>2.1.1.10245863\_900.apk，</strong>我们记下这个文件的地址和文件名，然后卸载设备上的**微信读书墨水屏版**应用
+
+![](/images/Installing-third-party-software-on-iReader-Ocean3-Plus/267f1b2f-d893-80c2-90b6-c13966665181.png)
+
+### 准备好需要安装的软件安装包和修改辅助程序参数
+
+由于设备的能力有限，有些软件的版本不受支持，因此如果一直显示安装失败就可以考虑换一个版本或其他替代软件了。
+
+我这里使用**MiXplorer**作为演示，首先从**MiXplorer**的下载云盘中选择**MiXplorer\_v6.68.4\_B24112323-arm.apk**
+
+![](/images/Installing-third-party-software-on-iReader-Ocean3-Plus/267f1b2f-d893-80ed-951f-cbb52861ea0d.png)
+
+复制到iReader存储中，为了方便我直接复制到了iReader\\app目录下，此时需要安装和替换的安装包目录为：
+
+**微信读书墨水屏版：/iReader/app/com.tencent.weread.eink/2.1.1.10245863\_900.apk**
+
+**MiXplorer：/iReader/app/MiXplorer\_v6.68.4\_B24112323-arm.apk**
+
+![](/images/Installing-third-party-software-on-iReader-Ocean3-Plus/267f1b2f-d893-80bf-9903-e8fb52013a87.png)
+
+然后从 [**GitHub**](https://github.com/QinYangWang/ireader) 下载我编写的辅助工具代码，如果你没有安装Golang，还需要先[安装Golang](https://go.dev/doc/install)
+
+![](/images/Installing-third-party-software-on-iReader-Ocean3-Plus/267f1b2f-d893-80af-87a7-c4ab55a97e69.png)
+
+解压代码包，用你顺手的文本编辑器编辑**main.go**里的代码并保存：
+
+![](/images/Installing-third-party-software-on-iReader-Ocean3-Plus/267f1b2f-d893-8055-8468-da43668dfa6d.png)
+
+运行下面的命令安装依赖：
+
+```powershell
+go mod tidy
+```
+
+### 运行辅助程序同时从应用商店开始安装微信阅读墨水屏版
+
+通过下面的命令运行辅助程序并同时从应用商店重新安装**微信阅读墨水屏版**
+
+```powershell
+go run main.go
+```
+
+![](/images/Installing-third-party-software-on-iReader-Ocean3-Plus/267f1b2f-d893-80af-aaba-d38b530c84f6.png)
+
+当辅助程序替换完安装包之后会自动退出，此时的墨水屏设备显示安装中，如果应用市场页面不显示安装出错的报错则可以退出去看到实际安装好的应用了。
+
+如果一直卡在安装中可能说明你的安装包不受支持，可以换一个安装包并重启设备重新根据上面的流程尝试安装。

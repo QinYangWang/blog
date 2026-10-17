@@ -1,0 +1,224 @@
+---
+title: "折腾日记 | 提供免费额度的 DBaaS 整理"
+description: "对提供免费额度的数据库服务平台的整理。"
+date: 2024-08-01
+tags: ["折腾日记"]
+author: QinYang Wang
+---
+
+## 前言
+
+在部署一些开源项目的时候，经常会遇到需要数据库的场合，但是由于机器本身的配置就不高，因此寻找第三方的数据库服务是一个更好的选择，在寻找的过程中发现很多平台都提供了免费额度的数据库服务，本文就是对这些平台做一个整理。
+
+## PostgreSQL
+
+### Supabase
+
+#### 官网
+
+[https://supabase.com/](https://supabase.com/)
+
+#### 免费套餐
+
+- Unlimited API requests
+- 500 MB Database Size
+- 5GB Bandwidth
+- Pausing After 1 inactive week
+- Limit of 2 free organizations
+
+### Neon
+
+#### 官网
+
+[https://neon.tech/](https://neon.tech/)
+
+#### 免费套餐
+
+- One Neon project with up to 10 branches.
+- 3 GiB of storage per branch.
+- Unlimited Postgres databases
+- A shared compute with 1 GB of RAM for each branch.
+- 100 hours of Active time per month, affecting non-primary branch compute usage only. Active time on all computes is counted toward the limit, but when the limit is exceeded, only non-primary branch computes are subject to suspension. Your primary branch compute always remains available regardless of the limit, ensuring that access to data on your primary branch is never interrupted. You can monitor Active time on the Usage widget on the Neon Dashboard. The Active time limit resets at the beginning of each month. For instance, if you enroll in the Neon Free Tier in the middle of the month, say on January 15th, your Active time limit will reset on February 1st, the first day of the following month.
+- A point-in-time restore window of 7 days of reasonable usage.
+
+## MySQL
+
+### PlanetScale
+
+#### 官网
+
+[https://planetscale.com/](https://planetscale.com/)
+
+#### 免费套餐
+
+- 5 GB storage included
+- 1 billion row reads per month ($1 per additional billion)
+- 1B row reads/ month
+- 10 million row reads per month ($1.50 per additional million)
+- 10M row writes/ month
+- 1 production branch
+- 1 development branch
+
+### TiDBCloud
+
+#### 官网
+
+[https://tidbcloud.com/](https://tidbcloud.com/)
+
+#### 免费套餐
+
+- Fully-managed cloud DBaaS for applications with variable workloads, available on AWS.
+- 25 GB of row storage, 25 GB of column storage, and 250M Request Units (RUs) for free per month for each organization
+- $0.20 per additional GB of storage
+- $0.10 per additional 1M RUs
+- Pay only for the storage and capacity you use
+- Set spend limits so you don’t go over budget
+- Scale down to zero
+
+## NoSQL
+
+### MongoDB Atlas
+
+#### 官网
+
+[https://www.mongodb.com/](https://www.mongodb.com/)
+
+#### 免费套餐
+
+- 512MB of storage
+- Shared RAM
+- Upgrade to dedicated clusters for full functionality
+- No credit card required to start
+
+### AWS DynamoDB
+
+#### 官网
+
+[https://aws.amazon.com/](https://aws.amazon.com/)
+
+#### 免费套餐
+
+- 25GB of storage,
+- 25 provisioned Write Capacity Units
+- 25 provisioned Read Capacity Units
+
+### Azure CosmosDB
+
+#### 官网
+
+[https://azure.microsoft.com/en-us/pricing/details/cosmos-db/autoscale-provisioned/](https://azure.microsoft.com/en-us/pricing/details/cosmos-db/autoscale-provisioned/)
+
+#### 支持数据库
+
+- NoSQL
+- MongoDB
+- Cassandra
+- Gremlin
+- Table
+
+#### 免费额度
+
+For the first 12 months:
+
+- 1400 RU/s (1000 RU/s from Azure Cosmos DB free tier and 400 RU/s from Azure free account)
+- 50 GB of storage (25 GB from Azure Cosmos DB free tier and 25 GB from Azure free account)
+
+After the 12 months expire:
+
+- 1000 RU/s from the Azure Cosmos DB free tier
+- 25 GB from the Azure Cosmos DB free tier
+
+## Redis
+
+### Upstash
+
+#### 官网
+
+[https://upstash.com/](https://upstash.com/)
+
+#### 免费套餐
+
+- Max command per second 1,000
+- Daily command limit 10,000
+- Max request size 1 MB
+- Max record size	100 MB
+- Max data size 256 MB
+- Max concurrent connections 100
+- Max monthly bandwidth 50GB
+
+### Deno
+
+#### 官网
+
+[https://deno.com/](https://deno.com/)
+
+#### 免费套餐
+
+- KV storage 1 GB
+- KV read units/mo (4kb) 450,000
+- KV write units/mo (1kb) 300,000
+- Number of DB regions 1
+
+### Cloudflare KV
+
+#### 官网
+
+[https://cloudflare.com/](https://cloudflare.com/)
+
+#### 免费套餐
+
+- KV storage 1 GB
+- 1 GB - Key-value storage space
+- 100K - Key-value reads per day
+- 1K - Key-value writes per day
+- 1K - Key-value deletes per day
+- 1K - Key-value lists per day
+
+## Paas
+
+### Vercel
+
+#### 官网
+
+[https://vercel.com/](https://vercel.com/)
+
+#### 支持数据库
+
+- **Redis**
+- **Postgres**
+
+#### 免费额度
+
+KV
+
+- 30,000 Requests
+
+Postgres
+
+- 60 Compute Hours
+
+### Render
+
+#### 官网
+
+[https://render.com/](https://render.com/)
+
+#### 支持数据库
+
+- PostgreSQL
+- Redis
+
+#### 免费额度
+
+PostgreSQL
+
+- $0 for first 90 days
+- 256 MB RAM
+- 0.1 CPU
+- 1 GB SSD
+- 97 connections
+
+Redis
+
+- 25 MB RAM
+- 50 connections

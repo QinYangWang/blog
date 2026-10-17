@@ -1,0 +1,199 @@
+---
+title: "折腾日记 | 国内可用镜像仓库代理"
+description: "举例国内可以的使用的镜像代理"
+date: 2024-08-01
+tags: ["容器", "Docker", "折腾日记"]
+author: QinYang Wang
+---
+
+### 起因
+
+今日购入一台阿里云 ECS，在折腾的时候发现部分国外的镜像拉取速度过慢，并且阿里云 ACR 镜像加速下载的镜像都不是最新的，寻找了些一些解决方案和国内可用的镜像代理服务，在这里做个记录。
+
+由于不可抗力，多数镜像代理服务平台已经下线代理，于 2024/10/12 对此文进行更新，下表为收集的加速器列表，不定时更新，有失效可能。
+
+目前可用的镜像站已知有企业维护的仅 DaoCloud 镜像站，由于我的机器是阿里云 ECS 因此我使用的阿里云提供的镜像仓库方案，你也可以尝试使用 Cloudflare Wokers 自建镜像加速器。
+
+### 镜像加速器列表
+
+| 供应商 | 加速器地址 | 备注 |
+| --- | --- | --- |
+| [DaoCloud](https://docs.daocloud.io/community/mirror/) | [https://docker.m.daocloud.io](https://docker.m.daocloud.io/) | 仅限境内机器使用，白名单模式，不在名单的镜像需要提交申请。 |
+| [1plane](https://1panel.cn/docs/user_manual/containers/setting/) | [https://docker.1panel.live](https://docker.1panel.live/)  [https://dockerproxy.1panel.live](https://dockerproxy.1panel.live/)  [https://proxy.1panel.live](https://proxy.1panel.live/) | 仅限境内机器使用，可能会有流量限制。 |
+| [毫秒镜像](https://1ms.run/) | [https://docker.1ms.run](https://docker.1ms.run/) |   |
+
+> 💡 我搜索到是很多人在使用 Cloudflare Wokers 自建镜像代理，有兴趣的可以自行搜索相关教程。
+
+目前提供镜像加速服务的供应商较少，由于我使用的是阿里云 ECS，因此为了方便，我通过 GitHub Action 定时同步镜像到阿里云 ACR 来使用 Docker，本文的目的就是想跟大家分享一下我在同步镜像的经验，希望可以给大家提供一个参考。
+
+### 使用 GitHub Action 定时同步镜像到阿里云 ACR
+
+本文主要有以下几个部分：
+
+- 如何在 ACR 中创建镜像仓库命名空间和仓库
+- 如何获取 ACR 的授权信息
+- 如何配置 GitHub Actions 同步镜像
+
+事不宜迟，那让我们马上开始吧！
+
+#### Step 1. 在 ACR 中创建镜像仓库命名空间和仓库
+
+搭建第一步是在阿里云容器镜像服务（Aliyun Container Registry）中创建命名空间（namespace）和镜像仓库（repository）。在开始之前，我想先解释一下这个镜像服务地址、命名空间、以及仓库名字的含义。因为明白它们的含义有助于理解下文，理解现在做到哪一步。在下载 Docker image 的时候，一个仓库的全称可能长成下面这样：
+
+```js
+registry.cn-shenzhen.aliyuncs.com/qinyangwang/nginx
+```
+
+也就是：
+
+```js
+${REGISTRY}/${NAMESPACE}/${REPOSITORY}
+```
+
+具体来说，
+
+- <strong>`REGISTRY`</strong> 是阿里云容器镜像服务地址，其中的 <strong>`cn-shenzhen`</strong> 是区域的地址，你只需要替换到离你最近的区域即可，可用的区域列表请参考[**地域和可用区列表**](https://help.aliyun.com/document_detail/40654.html#concept-nwo-3ho-q3v)中的<strong>`地域ID`</strong>。
+- <strong>`NAMESPACE`</strong> 是镜像的命名空间，管理该命名空间下的仓库集合，包括仓库权限和仓库属性，这里你随意设置一个自己记得住的字符串即可。
+- <strong>`REPOSITORY`</strong> 是镜像仓库的名称，尽量输入易于辨别的字符串，比如我同步 <strong>`vaultwarden/server`</strong> 镜像到ACR就是 <strong>`registry.cn-shenzhen.aliyuncs.com/qinyangwang/vaultwarden`</strong> <strong>。</strong>
+
+了解了镜像名称之后，我们开始创建镜像仓库实例：
+
+1. 登录[容器镜像服务控制台](https://cr.console.aliyun.com/)。
+
+   > 💡 若您是首次登录容器镜像服务控制台，您需要设置Registry登录密码，以便镜像的上传和下载。
+   >
+   > - 使用账号登录，需要设置Registry登录密码。
+   > - 使用RAM角色登录，需要调用接口获取临时账号密码登录。具体操作，请参见[GetAuthorizationToken - 获取用于登录实例的临时账号和临时密码](https://help.aliyun.com/zh/acr/developer-reference/api-cr-2018-12-01-getauthorizationtoken)。
+
+2. 在顶部菜单栏，选择所需地域。
+
+   ![](/images/china-mirror-proxy/11df1b2f-d893-808a-8deb-cd00242ea9a3.png)
+
+3. 在左侧导航栏，选择**实例列表**。
+
+   ![](/images/china-mirror-proxy/11df1b2f-d893-8028-94d4-f2fc5855378a.png)
+
+4. 在**实例列表**页面，单击个人版区域任意位置。
+
+   ![](/images/china-mirror-proxy/11df1b2f-d893-805c-8772-dd25cfde4cd5.png)
+
+5. 在**提示**对话框单击**创建个人版**。
+
+6. 在个人版实例管理页面选择**仓库管理 \> 命名空间**。
+
+   ![](/images/china-mirror-proxy/11ff1b2f-d893-806b-94d0-e39a3888b127.png)
+
+7. 在**命名空间**页面单击**创建命名空间**。
+
+   ![](/images/china-mirror-proxy/11ff1b2f-d893-80a0-9f8f-c1f311839da7.png)
+
+8. 在**创建命名空间**对话框中设置命名空间名称，单击**确定**。
+
+#### Step 2. 获取 ACR 的授权信息
+
+**获取镜像仓库的登录名**
+
+- 如果您使用的是阿里云账号，阿里云账号就是您的镜像仓库登录名。
+- 如果您使用的是RAM用户，去掉RAM用户账号aliyundoc.com后的名称就是您的镜像仓库登录名。例如您的RAM用户为28768383240243\*\*\*\*@aliyundoc.com，则您的镜像仓库登录名为28768383240243\*\*\*\*。
+
+**设置镜像仓库登录密码**
+
+1. 登录[容器镜像服务控制台](https://cr.console.aliyun.com/)。
+
+2. 单击**设置Registry登录密码**。
+
+   > 💡 如果您忘记设置的Registry登录密码，您可以在**个人实例 \> 仓库管理 \> 访问凭证**来重置密码。
+
+   ![](/images/china-mirror-proxy/11ff1b2f-d893-8015-bebf-c060b90c1387.png)
+
+3. 在**设置Registry登录密码**对话框中输入**密码**和**确认密码**，单击**确定**。
+
+   ![](/images/china-mirror-proxy/11ff1b2f-d893-802b-a4cc-cc6b1e541a91.png)
+
+#### Step 3. 配置 GitHub Actions 同步镜像
+
+配置 GitHub Actions 可以参考[我的 GitHub 仓库](https://github.com/QinYangWang/actions)：
+
+1. 准备 `auth.yaml`，`images.yaml` ，`image-sync.yml` 这 3 个文件，它们分别是镜像仓库认证信息，源和目标镜像映射关系，Action 工作流模板，按下面的路径存储：
+
+   ```text
+   .github/
+       workflows/
+           image-sync.yml  # Workflow templates
+   image-sync/
+       auth.yaml           # Docker image repository verification information
+       images.yaml         # Map of source and target images
+   ```
+
+2. 除了 `image-sync.yml` 的路径是固定的，其他两个路径可以自定义，只需要在 `image-sync.yml` 修改参数即可：
+
+   ```yaml
+   jobs:
+       sync-images:
+           with:
+               auth_file: ./image-sync/auth.yaml           # The auth information file of registries, optional.
+               images_file: ./image-sync/images.yaml       # The images file descirbes which images need to sync, always needed.
+               version: latest                             # The version of image-syncer, use the latest version if not specified.
+               proc: 6                                     # The max number of goroutines to sync images, default value is 5.
+   ```
+
+3. 需要在 `auth.yaml` 中输入目标 registry 的鉴权信息（如果源 registry 也需要鉴权，则源 registry 的鉴权信息也需要输入），最佳实践是将鉴权信息输入到 Secrets 中，然后在 `image-sync.yml` 中作为 `env` 使用，最后在 `auth.yaml` 中以 `${XXX}` 的形式引用：
+
+   ```text
+   # auth.yaml
+   registry.cn-hangzhou.aliyuncs.com:
+     username: ${ACR_USERNAME}
+     password: ${ACR_PASSWORD}
+   # image-sync.yml
+   jobs:
+       sync-images:
+         env:
+           ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+           ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+   ```
+
+   在GitHub 仓库的 **Settings** 中点击 **Secrets and variables** \> **Actions**，然后在 **Repository secrets** 点击 **New repository secret** 来添加鉴权信息：
+
+   ![](/images/china-mirror-proxy/11ff1b2f-d893-800f-8cf5-e392749bc727.png)
+
+4. 镜像同步配置文件定义了所有的镜像同步规则。每条规则都是一个键值对，键表示“源镜像地址”，值表示“目标镜像地址”。源/目标镜像地址与我们在 `docker pull/push` 命令中使用的 url 基本相同，但在“tags 和 digest”部分还是有区别的：
+
+   - 源镜像url和目标镜像url都不能为空。
+   - 如果源镜像url不包含tags或digest，则源仓库的所有tags都会被同步。
+   - 源镜像url可以有多个tags，tags之间用逗号隔开，只有指定的tags才会被同步。
+   - 源镜像url最多只能有一个digest，目标镜像url只能没有digest或者同时有相同的digest。
+   - 源镜像url的“tags”部分可以是一个正则表达式，需要有一个额外的前缀和后缀字符串/。源仓库中所有符合正则表达式的标签都会被同步，不支持多个正则表达式。
+   - 如果目标镜像url没有摘要或标签，则表示源镜像在同步后会保留相同的标签或摘要。
+   - 目标镜像url可以有多个标签，标签数量必须与源镜像url中的标签数量相同，则所有源镜像的标签都会更改为新标签（从左到右对应）。
+   - “目标镜像url”也可以是一个数组，每个数组都遵循上述规则。
+
+   ```yaml
+   # If the source images url contains no tags or digest, all the tags of source repository will be synced.
+   quay.io/coreos/kube-rbac-proxy: quay.io/ruohe/kube-rbac-proxy
+   # The source images url can have more than one tags, which should be seperated by comma, only the specified tags will be synced.
+   quay.io/coreos/kube-rbac-proxy:v1.0: quay.io/ruohe/kube-rbac-proxy
+   quay.io/coreos/kube-rbac-proxy:v1.0,v2.0: quay.io/ruohe/kube-rbac-proxy
+   # The source images url can have at most one digest, and the destination images url should only have no digest or the same digest at the same time.
+   quay.io/coreos/kube-rbac-proxy@sha256:14b267eb38aa85fd12d0e168fffa2d8a6187ac53a14a0212b0d4fce8d729598c: quay.io/ruohe/kube-rbac-proxy
+   # The "destination images url" can also be an array, each of which follows the rules above.
+   quay.io/coreos/kube-rbac-proxy:v1.1:
+     - quay.io/ruohe/kube-rbac-proxy1
+     - quay.io/ruohe/kube-rbac-proxy2
+   ```
+
+   5. 我在 `image-sync.yml` 中配置了两个触发条件，你可以参考 [GitHub 文档](https://docs.github.com/zh/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow)按需修改：
+
+      - 每日0点（UTC时间）
+      - 当 <strong>`main`</strong> 分支有新的提交
+
+   ```yaml
+   on:
+     workflow_dispatch:
+     schedule:
+       - cron: "0 0 * * *"
+     push:
+       branches:
+         - main
+   ```
+
+   6. 配置完成之后，此 Action 会每日定时同步镜像到 ACR 中，我目前使用的镜像较少没有什么特殊的问题，如果你有什么使用问题请在 [QinYangWang/actions](https://github.com/QinYangWang/actions) 这个仓库下提交 issues，我会尽量解答或修复相关问题。
