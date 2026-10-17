@@ -13,6 +13,7 @@ export default defineConfig({
   ],
   theme: {
     favicon: '/favicon.png',
+    logo: '/brand/logo.png',
     social: {
       github: 'https://github.com/QinYangWang',
       x: 'https://twitter.com/EthanWQY',
@@ -21,6 +22,7 @@ export default defineConfig({
     authors: {
       'QinYang Wang': {
         bio: 'DevOps based in China. Serverless, CloudNative, iOS, DevOps, BuildInPublic.',
+        avatar: '/brand/avatar.png',
       },
     },
     footer: { text: "© 2024–2026 QinYang Wang 's Blog" },
