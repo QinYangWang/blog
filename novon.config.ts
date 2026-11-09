@@ -11,6 +11,15 @@ export default defineConfig({
   rss: { path: '/feed', full: true },
   tags: { path: '/tag', lowercase: false },
   og: { enabled: true },
+  // Old NotionNext paths. novon writes a forwarding page for each, so they redirect on hosts
+  // without redirect rules (GitHub Pages) and in `_redirects` for the ones that read it.
+  redirects: {
+    '/page/2': '/',
+    '/search': '/',
+    '/tag/信用卡': '/',
+    '/tag/科技': '/',
+    '/tag/产品体验': '/',
+  },
   nav: [
     { label: '博客', href: '/' },
     { label: '关于', href: '/about' },

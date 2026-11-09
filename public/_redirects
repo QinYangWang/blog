@@ -1,8 +1,5 @@
-# Old NotionNext paths that novon serves elsewhere.
-/page/2          /              301
+# Cloudflare and Netlify read this file; GitHub Pages ignores it. The old NotionNext
+# paths live in `redirects` in novon.config.ts, which also writes a forwarding page
+# for each of them, so they work on every host. A splat is the one thing only these
+# hosts can do, so it stays here.
 /page/*          /              301
-/search          /              301
-# tags on the old sitemap that no longer have posts
-/tag/信用卡       /              301
-/tag/科技         /              301
-/tag/产品体验     /              301

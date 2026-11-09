@@ -33,8 +33,11 @@ as `NOVON_BASE` and `NOVON_URL`, so `novon.config.ts` keeps the custom domain an
 the Cloudflare deploy is untouched. For a custom domain on Pages instead, swap
 `base` for `cname`.
 
-`public/_redirects` and `public/_headers` are Cloudflare only; Pages ignores them,
-so the old NotionNext paths (`/page/*`, `/search`, old tags) 404 there.
+`public/_redirects` and `public/_headers` are Cloudflare only; Pages ignores them. The
+old NotionNext paths (`/page/2`, `/search`, the retired tags) therefore live in
+`redirects` in `novon.config.ts` as well: novon writes a forwarding page at each one,
+so they redirect on Pages too. Only the `/page/*` splat needs a host that reads
+`_redirects`.
 
 ## Header images
 
