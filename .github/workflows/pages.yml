@@ -1,0 +1,28 @@
+name: pages
+
+# Build with novon and publish to GitHub Pages: https://qinyangwang.github.io/blog/
+#
+# One-time setup: Settings → Pages → Source "GitHub Actions".
+# The site is served from the /blog/ sub-path, so the workflow passes `base` and `url`; with a
+# custom domain instead, drop `base`, set `url` and `cname` (see novon's guide/deploying).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  pages:
+    uses: QinYangWang/novon/.github/workflows/pages.yml@main
+    with:
+      base: /blog/
+      url: https://qinyangwang.github.io/blog/
+      build-command: ./build.sh
