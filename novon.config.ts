@@ -12,13 +12,13 @@ export default defineConfig({
   rss: { path: '/feed.xml', full: true },
   tags: { path: '/tag', lowercase: false },
   og: { enabled: true },
-  // 汇文明朝体 for every page; `theme/fonts.css` maps the theme's font roles onto it.
+  // 寒蝉全圆体 for every page; `theme/fonts.css` maps the theme's font roles onto it.
   head: [
     {
       tag: 'link',
       attrs: {
         rel: 'stylesheet',
-        href: 'https://cn-font.claude-code-best.win/packages/hwmct/dist/汇文明朝体/result.css',
+        href: 'https://cn-font.claude-code-best.win/packages/hcqyt/dist/ChillRoundFRegular/result.css',
       },
     },
   ],
