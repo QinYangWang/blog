@@ -1,5 +1,7 @@
 # Cloudflare and Netlify read this file; GitHub Pages ignores it. The old NotionNext
 # paths live in `redirects` in novon.config.ts, which also writes a forwarding page
 # for each of them, so they work on every host. A splat is the one thing only these
-# hosts can do, so it stays here.
+# hosts can do, so it stays here. The feed moved to /feed.xml: GitHub Pages picks the
+# media type from the extension, and `/feed` came back as a download.
 /page/*          /              301
+/feed            /feed.xml      301

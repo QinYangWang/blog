@@ -8,7 +8,7 @@ Migrated from NotionNext on 2026-10-17.
 | `novon.config.ts` | site config (blog layout) |
 | `content/<slug>.mdx` | one file per post; the file name is the URL (`/<slug>`) |
 | `public/images/<slug>/` | post images, downloaded from Notion |
-| `public/_redirects` | old NotionNext paths: `/feed`, `/tag/*`, `/page/*`, `/search` |
+| `public/_redirects` | Cloudflare rules: the old `/feed` and `/page/*` splat |
 | `scripts/migrate.py` | re-runnable Notion → MDX migration (`--refetch` to re-download) |
 | `build.sh` | `novon build` with a novon checkout |
 | `deploy.sh` | direct upload to the Cloudflare Pages project `qinyang-wang` |

@@ -7,7 +7,9 @@ export default defineConfig({
   lang: 'zh-CN',
   layout: 'blog',
   trailingSlash: false,
-  rss: { path: '/feed', full: true },
+  // `.xml` on purpose: GitHub Pages sets the media type from the extension, so an
+  // extension-less `/feed` would be served as a download.
+  rss: { path: '/feed.xml', full: true },
   tags: { path: '/tag', lowercase: false },
   og: { enabled: true },
   // Old NotionNext paths. novon writes a forwarding page for each, so they redirect on hosts
@@ -18,11 +20,13 @@ export default defineConfig({
     '/tag/信用卡': '/',
     '/tag/科技': '/',
     '/tag/产品体验': '/',
+    // The feed used to live at /feed; keep the old link working where a host cannot 301 it.
+    '/feed': '/feed.xml',
   },
   nav: [
     { label: '博客', href: '/' },
     { label: '关于', href: '/about' },
-    { label: '订阅', href: '/feed' },
+    { label: '订阅', href: '/feed.xml' },
   ],
   theme: {
     favicon: '/favicon.png',
