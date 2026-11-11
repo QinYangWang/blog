@@ -3,9 +3,12 @@
  * the 中文网字计划 CDN, which serves its subset files next to it, so it cannot be imported here.
  * This file only points the theme's font roles at the family.
  *
+ * --default-font-family is in the list because Preflight sets `<html>` from that variable with the
+ * sans stack already flattened into it, so overriding --font-sans alone would not reach the page.
  * --font-mono stays as it is: dates and code are measured in a mono face.
  */
 :root {
+  --default-font-family: "Huiwen-mincho", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   --font-sans: "Huiwen-mincho", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   --font-serif: "Huiwen-mincho", "Noto Serif SC", "Songti SC", "SimSun", serif;
   --font-heading: "Huiwen-mincho", "Noto Sans SC", "PingFang SC", system-ui, sans-serif;
