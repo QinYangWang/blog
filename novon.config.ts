@@ -12,16 +12,11 @@ export default defineConfig({
   rss: { path: '/feed.xml', full: true },
   tags: { path: '/tag', lowercase: false },
   og: { enabled: true },
-  // 寒蝉全圆体 for every page; `theme/fonts.css` maps the theme's font roles onto it.
-  head: [
-    {
-      tag: 'link',
-      attrs: {
-        rel: 'stylesheet',
-        href: 'https://cn-font.claude-code-best.win/packages/hcqyt/dist/ChillRoundFRegular/result.css',
-      },
-    },
-  ],
+  // 寒蝉全圆体 for every page: the stylesheet declares the face, novon puts it on every font role.
+  font: {
+    css: 'https://cn-font.claude-code-best.win/packages/hcqyt/dist/ChillRoundFRegular/result.css',
+    family: '寒蝉全圆体',
+  },
   // Old NotionNext paths. novon writes a forwarding page for each, so they redirect on hosts
   // without redirect rules (GitHub Pages) and in `_redirects` for the ones that read it.
   redirects: {
@@ -39,7 +34,6 @@ export default defineConfig({
     { label: '订阅', href: '/feed.xml' },
   ],
   theme: {
-    css: ['theme/fonts.css'],
     favicon: '/favicon.png',
     logo: '/brand/logo.png',
     social: {
