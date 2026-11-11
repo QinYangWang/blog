@@ -1,0 +1,66 @@
+name: preview
+
+# Builds the site and screenshots it, so a layout change can be reviewed without touching the live
+# site. Manual only.
+#
+#   gh workflow run preview -f novon-ref=paneui-blog
+on:
+  workflow_dispatch:
+    inputs:
+      novon-ref:
+        description: novon branch, tag or commit to build with.
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Check out novon
+        env:
+          REF: ${{ inputs.novon-ref }}
+        run: |
+          git clone --depth 1 --branch "$REF" https://github.com/QinYangWang/novon.git "$RUNNER_TEMP/novon"
+          echo "NOVON=$RUNNER_TEMP/novon" >> "$GITHUB_ENV"
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install novon
+        working-directory: ${{ runner.temp }}/novon
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: ./build.sh
+
+      - name: Screenshots
+        run: |
+          set -euo pipefail
+          (cd dist && python3 -m http.server 8080 >/dev/null 2>&1 &)
+          sleep 3
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          mkdir -p shots
+          shot() {
+            name=$1; path=$2; size=$3; shift 3
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
+              --window-size="$size" --virtual-time-budget=5000 "$@" \
+              --screenshot="shots/$name.png" "http://localhost:8080$path"
+          }
+          shot home "/" 1280,1400
+          shot post "/china-mirror-proxy" 1280,1800
+          shot tag "/tag/%E6%8A%98%E8%85%BE%E6%97%A5%E8%AE%B0" 1280,1400
+          shot about "/about" 1280,1200
+          shot home-mobile "/" 430,1200
+          shot home-dark "/" 1280,1400 --force-dark-mode
+          ls -la shots
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shots
+          path: shots
+          retention-days: 7
