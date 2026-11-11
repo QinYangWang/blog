@@ -51,12 +51,13 @@ jobs:
               --window-size="$size" --virtual-time-budget=5000 "$@" \
               --screenshot="shots/$name.png" "http://localhost:8080$path"
           }
-          shot home "/" 1280,1400
-          shot post "/china-mirror-proxy" 1280,1800
-          shot tag "/tag/%E6%8A%98%E8%85%BE%E6%97%A5%E8%AE%B0" 1280,1400
-          shot about "/about" 1280,1200
-          shot home-mobile "/" 430,1200
-          shot home-dark "/" 1280,1400 --force-dark-mode
+          # python's server has no clean-URL mapping, so ask for the built `.html` files.
+          shot home "/index.html" 1280,1400
+          shot post "/china-mirror-proxy.html" 1280,2600
+          shot tag "/tag/%E6%8A%98%E8%85%BE%E6%97%A5%E8%AE%B0.html" 1280,1400
+          shot about "/about.html" 1280,1400
+          shot home-mobile "/index.html" 430,1400
+          shot home-dark "/index.html" 1280,1400 --force-dark-mode
           ls -la shots
 
       - uses: actions/upload-artifact@v4
