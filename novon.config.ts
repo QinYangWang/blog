@@ -1,5 +1,4 @@
 import { defineConfig } from 'novon/config'
-import covers from './plugins/covers.ts'
 
 export default defineConfig({
   title: "QinYang Wang 's Blog",
@@ -41,5 +40,5 @@ export default defineConfig({
     },
     footer: { text: "© 2024–2026 QinYang Wang 's Blog" },
   },
-  plugins: ['search', 'sitemap', 'rss', 'llms', covers],
+  plugins: ['search', 'sitemap', 'rss', 'llms'],
 })

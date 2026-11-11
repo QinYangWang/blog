@@ -10,15 +10,14 @@ Migrated from NotionNext on 2026-10-17.
 | `public/images/<slug>/` | post images, downloaded from Notion |
 | `public/_redirects` | old NotionNext paths: `/feed`, `/tag/*`, `/page/*`, `/search` |
 | `scripts/migrate.py` | re-runnable Notion → MDX migration (`--refetch` to re-download) |
-| `scripts/generate-covers.ts` | renders the post header images into `public/covers/` (build output, not in git) |
-| `plugins/covers.ts` | hands `public/covers/<slug>.png` to its post as `cover` |
-| `build.sh` | generates the header images, then runs `novon build` |
+| `build.sh` | `novon build` with a novon checkout |
 | `deploy.sh` | direct upload to the Cloudflare Pages project `qinyang-wang` |
 | `.github/workflows/pages.yml` | calls novon's reusable workflow: build and publish to GitHub Pages |
+| `.github/workflows/preview.yml` | builds a novon ref and screenshots the site, without deploying |
 
 ```bash
 git clone https://github.com/QinYangWang/novon ../novon && (cd ../novon && bun install)
-./build.sh                          # writes public/covers/ and dist/
+./build.sh                          # writes dist/
 npx wrangler pages deploy dist --project-name qinyang-wang   # or ./deploy.sh inside Hark
 ```
 
@@ -39,20 +38,14 @@ old NotionNext paths (`/page/2`, `/search`, the retired tags) therefore live in
 so they redirect on Pages too. Only the `/page/*` splat needs a host that reads
 `_redirects`.
 
-## Header images
+## Preview
 
-Every post gets a 1600×686 title card: the mesh gradient novon seeds from the slug, with the
-title, date, author and tags drawn on it. `build.sh` renders them into `public/covers/<slug>.png`
-first, and `plugins/covers.ts` gives each post the file with its slug as `cover`, so a post needs
-no frontmatter for it and adding a post is enough to get a card.
+`preview.yml` builds the site against any novon branch and screenshots the pages, so a layout
+change can be looked at before it ships. From the Actions tab, or:
 
-- It re-renders only what changed (title, date, author, tags, palette): `--force` redoes all,
-  `--dry` reports without writing.
-- The images are build output: `public/covers/` is in `.gitignore`, so the repo stays small and
-  a build always matches the post titles. `cover:` in frontmatter still wins when a post has a
-  picture of its own.
-- Type is kept inside the middle 72% of the canvas, because 16:9 boxes on phones and the
-  featured card crop about 12–14% off each side.
-- Fonts are Noto Sans SC subsets fetched per card and cached in `.novon/covers/fonts/`, so the
-  repo carries no CJK font. `NOVON=<path> bun scripts/generate-covers.ts` points at another
-  novon checkout.
+```bash
+gh workflow run preview -f novon-ref=<branch>
+```
+
+It uploads `shots/` (home, a post, a tag page, about, mobile width, dark mode) as a build
+artifact and never deploys.

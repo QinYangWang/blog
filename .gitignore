@@ -3,4 +3,3 @@ dist/
 .migrate-cache/
 node_modules/
 .manifest.json
-public/covers/
