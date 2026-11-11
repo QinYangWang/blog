@@ -44,7 +44,7 @@ export default defineConfig({
     logo: '/brand/logo.png',
     social: {
       github: 'https://github.com/QinYangWang',
-      x: 'https://twitter.com/EthanWQY',
+      x: 'https://x.com/oukinyou',
       rss: true,
     },
     authors: {
